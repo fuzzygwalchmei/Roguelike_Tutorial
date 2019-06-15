@@ -2,6 +2,7 @@ from map_objects.tile import Tile
 from map_objects.rectangle import Rect
 from random import randint
 
+
 class GameMap:
     def __init__(self, width, height):
         self.width = width
@@ -56,16 +57,16 @@ class GameMap:
                     """
                     # Coordinates of the previous room
                     (prev_x, prev_y) = rooms[num_rooms - 1].center()
-
+                    print("Room: ", len(rooms)," |  prev x: ", prev_x, " | prev y: ", prev_y, " | new x: ", new_x, " | new y: ", new_y)
                     # Randomise the direction of the tunnel 1 == horizontal
-                    if randint(0,1) == 1:
+                    if randint(0, 1) == 1:
                         # Move horizontal then vertical
                         self.create_h_tunnel(prev_x, new_x, prev_y)
-                        self.create_v_tunnel(prev_y, new_y, prev_x)
+                        self.create_v_tunnel(prev_y, new_y, new_x)
                     else:
-                        #move vertical then horizontal
+                        # move vertical then horizontal
                         self.create_v_tunnel(prev_y, new_y, prev_x)
-                        self.create_h_tunnel(prev_x, new_x, prev_y)
+                        self.create_h_tunnel(prev_x, new_x, new_y)
 
                 # Finally add the new room to the room list
                 rooms.append(new_room)
@@ -84,11 +85,13 @@ class GameMap:
         for x in range(min(x1, x2), max(x1, x2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+            print(" corridor horizontal - x: ", x, " | y: ", y)
 
     def create_v_tunnel(self, y1, y2, x):
         for y in range(min(y1, y2), max(y1, y2) + 1):
             self.tiles[x][y].blocked = False
             self.tiles[x][y].block_sight = False
+            print(" corridor vertical - x: ", x, " | y: ", y)
 
     def is_blocked(self, x, y):
         if self.tiles[x][y].blocked:
