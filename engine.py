@@ -133,7 +133,7 @@ def main():
 
                     break
                 else:
-                    message_log.add_message(Message('There is nothing to pick up here.', libtcod.yellow))
+                    message_log.add_message(Message('The {0} is not here to pick up here.'.format(entity.name), libtcod.yellow))
 
         if show_inventory:
             previous_game_state = game_state
@@ -148,7 +148,7 @@ def main():
             item = player.inventory.items[inventory_index]
 
             if game_state == GameStates.SHOW_INVENTORY:
-                player_turn_results.extend(player.inventory.use(item))
+                player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
             elif GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
 
