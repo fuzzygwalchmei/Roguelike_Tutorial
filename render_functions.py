@@ -32,11 +32,12 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_colour, back_
         libtcod.console_rect(panel, x, y, bar_width, 1, False, libtcod.BKGND_SCREEN)
 
     libtcod.console_set_default_foreground(panel, libtcod.white)
-    libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.format(name, value, maximum))
+    libtcod.console_print_ex(panel, int(x + total_width / 2), y, libtcod.BKGND_NONE, libtcod.CENTER, '{0}: {1}/{2}'.
+                             format(name, value, maximum))
 
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height, bar_width,
-               panel_height, panel_y, mouse, colours, game_state):
+def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+               bar_width, panel_height, panel_y, mouse, colours, game_state):
     """
     draw all entities in the game map
     """

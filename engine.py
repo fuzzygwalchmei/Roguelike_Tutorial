@@ -8,84 +8,41 @@ https://www.reddit.com/r/roguelikedev/comments/bz6s0j/roguelikedev_does_the_comp
 import tcod as libtcod
 import tcod.event
 
-from components.inventory import Inventory
+
 from death_functions import kill_monster, kill_player
-from game_messages import MessageLog, Message
+from game_messages import Message
 from input_handlers import handle_keys, handle_mouse
-from entity import Entity, get_blocking_entities_at_location
-from render_functions import clear_all, render_all, RenderOrder
-from map_objects.game_map import GameMap
+from entity import get_blocking_entities_at_location
+from render_functions import clear_all, render_all
 from fov_functions import initialise_fov, recompute_fov
 from game_states import GameStates
-from components.fighter import Fighter
+from loader_functions.initialise_new_game import get_constants, get_game_variables
 
 
 def main():
-    # global variables
-    screen_width = 80
-    screen_height = 50
-    bar_width = 20
-    panel_height = 7
-    panel_y = screen_height - panel_height
-
-    message_x = bar_width + 2
-    message_width = screen_width - bar_width - 2
-    message_height = panel_height - 1
-
-    map_width = 80
-    map_height = 43
-
-    room_max_size = 10
-    room_min_size = 6
-    max_rooms = 30
-
-    fov_algorithm = 0
-    fov_light_walls = True
-    fov_radius = 10
-
-    max_monsters_per_room = 3
-    max_items_per_room = 2
-
-    colours = {
-        'dark_wall': libtcod.Color(0, 0, 100),
-        'dark_ground': libtcod.Color(50, 50, 150),
-        'light_wall': libtcod.Color(130, 110, 50),
-        'light_ground': libtcod.Color(200, 180, 50)
-    }
-
-    # Set up characters and inventory
-    fighter_component = Fighter(hp=30, defense=2, power=5)
-    inventory_component = Inventory(26)
-    player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
-                    fighter=fighter_component, inventory=inventory_component)
-    entities = [player]
+    constants = get_constants()
 
     # Fonts
     libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
     # Initialise console
-    libtcod.console_init_root(screen_width, screen_height, 'Fuzzle Roguelike', False)
+    libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
 
     # Variables for console and display panel
-    con = libtcod.console_new(screen_width, screen_height)
-    panel = libtcod.console_new(screen_width, panel_height)
+    con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
+    panel = libtcod.console_new(constants['screen_width'], constants['screen_height'])
 
-    # create game map
-    game_map = GameMap(map_width, map_height)
-    game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities,
-                      max_monsters_per_room, max_items_per_room)
+    # Initalise variables
+    player, entities, game_map, message_log, game_state = get_game_variables(constants)
+
 
     # Field of View
     fov_recompute = True
     fov_map = initialise_fov(game_map)
 
-    # Create message log
-    message_log = MessageLog(message_x, message_width, message_height)
-
     # Define inputs
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
-    game_state = GameStates.PLAYERS_TURN
     previous_game_state = game_state
 
     targeting_item = None
@@ -95,11 +52,13 @@ def main():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
-            recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
+            recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
+                          constants['fov_algorithm'])
 
         # Render everything to the screen
-        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width,
-                   screen_height, bar_width, panel_height, panel_y, mouse, colours, game_state)
+        render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, constants['screen_width'],
+                   constants['screen_height'], constants['bar_width'], constants['panel_height'], constants['panel_y'],
+                   mouse, constants['colours'], game_state)
         fov_recompute = False
 
         libtcod.console_flush()
