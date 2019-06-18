@@ -21,6 +21,7 @@ from components.fighter import Fighter
 
 
 def main():
+    # global variables
     screen_width = 80
     screen_height = 50
     bar_width = 20
@@ -52,29 +53,35 @@ def main():
         'light_ground': libtcod.Color(200, 180, 50)
     }
 
+    # Set up characters and inventory
     fighter_component = Fighter(hp=30, defense=2, power=5)
     inventory_component = Inventory(26)
     player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
                     fighter=fighter_component, inventory=inventory_component)
     entities = [player]
 
+    # Fonts
     libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
-
+    # Initialise console
     libtcod.console_init_root(screen_width, screen_height, 'Fuzzle Roguelike', False)
 
+    # Variables for console and display panel
     con = libtcod.console_new(screen_width, screen_height)
     panel = libtcod.console_new(screen_width, panel_height)
 
+    # create game map
     game_map = GameMap(map_width, map_height)
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player, entities,
                       max_monsters_per_room, max_items_per_room)
 
+    # Field of View
     fov_recompute = True
-
     fov_map = initialise_fov(game_map)
 
+    # Create message log
     message_log = MessageLog(message_x, message_width, message_height)
 
+    # Define inputs
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
@@ -83,12 +90,14 @@ def main():
 
     targeting_item = None
 
+    # Main gam loop to run until the window is closed
     while not libtcod.console_is_window_closed():
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, fov_radius, fov_light_walls, fov_algorithm)
 
+        # Render everything to the screen
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width,
                    screen_height, bar_width, panel_height, panel_y, mouse, colours, game_state)
         fov_recompute = False
@@ -97,6 +106,7 @@ def main():
 
         clear_all(con, entities)
 
+        # Use imports and compare to the input handlers
         action = handle_keys(key, game_state)
         mouse_action = handle_mouse(mouse)
 
@@ -114,6 +124,7 @@ def main():
 
         player_turn_results = []
 
+        # Perform requested action
         if move and game_state == GameStates.PLAYERS_TURN:
             dx, dy = move
             destination_x = player.x + dx
@@ -179,6 +190,7 @@ def main():
         if fullscreen:
             libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
 
+        # Print all accumulated messages via message keys
         for player_turn_result in player_turn_results:
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
@@ -222,6 +234,7 @@ def main():
                 entities.append(item_dropped)
                 game_state = GameStates.ENEMY_TURN
 
+        # Perform enemy turn actions
         if game_state == GameStates.ENEMY_TURN:
             for entity in entities:
                 if entity.ai:
