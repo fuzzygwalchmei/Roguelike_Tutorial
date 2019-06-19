@@ -1,6 +1,7 @@
 
 import tcod as libtcod
 
+from components.stairs import Stairs
 from game_messages import Message
 from item_functions import heal, cast_lightning, cast_fireball, cast_confuse
 from map_objects.tile import Tile
@@ -14,10 +15,12 @@ from components.item import Item
 
 
 class GameMap:
-    def __init__(self, width, height):
+    def __init__(self, width, height, dungeon_level=1):
         self.width = width
         self.height = height
         self.tiles = self.initialise_tiles()
+
+        self.dungeon_level = dungeon_level
 
     def initialise_tiles(self):
         tiles = [[Tile(True) for y in range(self.height)] for x in range(self.width)]
@@ -30,6 +33,9 @@ class GameMap:
         """
         rooms = []
         num_rooms = 0
+
+        center_of_last_room_x = None
+        center_of_last_room_y = None
 
         for r in range(max_rooms):
             # random width and height
@@ -55,6 +61,9 @@ class GameMap:
 
                 # center coordinates for new room
                 (new_x, new_y) = new_room.center()
+
+                center_of_last_room_x = new_x
+                center_of_last_room_y = new_y
 
                 if num_rooms == 0:
                     # Upon creation of first room
@@ -83,6 +92,11 @@ class GameMap:
                 # Finally add the new room to the room list
                 rooms.append(new_room)
                 num_rooms += 1
+
+        stairs_component = Stairs(self.dungeon_level + 1)
+        down_stairs = Entity(center_of_last_room_x, center_of_last_room_y, '>', libtcod.white, 'stairs',
+                             render_order=RenderOrder.STAIRS, stairs=stairs_component)
+        entities.append(down_stairs)
 
     def create_room(self, room):
         """
@@ -165,3 +179,18 @@ class GameMap:
         if self.tiles[x][y].blocked:
             return True
         return False
+
+    def next_floor(self, player, message_log, constants):
+        self.dungeon_level += 1
+        entities = [player]
+
+        self.tiles = self.initialise_tiles()
+        self.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
+                      constants['map_width'], constants['map_height'], player, entities,
+                      constants['max_monsters_per_room'], constants['max_items_per_room'])
+
+        player.fighter.heal(player.fighter.max_hp // 2)
+
+        message_log.add_message(Message('You take a moment to rest, and recover your strength', libtcod.light_violet))
+
+        return entities

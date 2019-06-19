@@ -129,6 +129,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
         show_inventory = action.get('show_inventory')
         drop_inventory = action.get('drop_inventory')
         inventory_index = action.get('inventory_index')
+        take_stairs = action.get('take_stairs')
 
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
@@ -182,6 +183,19 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
             elif GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
+
+        if take_stairs and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.stairs and entity.x == player.x and entity.y == player.y:
+                    entities = game_map.next_floor(player, message_log, constants)
+                    fov_map = initialise_fov(game_map)
+                    fov_recompute = True
+                    libtcod.console_clear(con)
+
+                    break
+
+                else:
+                    message_log.add_message(Message('There are no stairs here', libtcod.yellow))
 
         if game_state == GameStates.TARGETING:
             if left_click:
