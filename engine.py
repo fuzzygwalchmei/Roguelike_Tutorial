@@ -5,7 +5,7 @@ https://www.reddit.com/r/roguelikedev/comments/bz6s0j/roguelikedev_does_the_comp
 
 """
 
-import tcod as libtcod
+import tcod
 import tcod.event
 
 
@@ -26,13 +26,14 @@ def main():
     constants = get_constants()
 
     # Fonts
-    libtcod.console_set_custom_font('arial10x10.png', libtcod.FONT_TYPE_GREYSCALE | libtcod.FONT_LAYOUT_TCOD)
+    tcod.console_set_custom_font('arial10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
     # Initialise console
-    libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
+    tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False,
+                              renderer=tcod.RENDERER_SDL2, vsync=True)
 
     # Variables for console and display panel
-    con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
-    panel = libtcod.console_new(constants['screen_width'], constants['screen_height'])
+    con = tcod.console.Console(constants['screen_width'], constants['screen_height'])
+    panel = tcod.console.Console(constants['screen_width'], constants['screen_height'])
 
     # Initalise variables
     player = None
@@ -44,13 +45,13 @@ def main():
     show_main_menu = True
     show_load_error_message = False
 
-    main_menu_background_image = libtcod.image_load('menu_background.png')
+    main_menu_background_image = tcod.image_load('menu_background.png')
 
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
+    key = tcod.Key()
+    mouse = tcod.Mouse()
 
-    while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+    while not tcod.console_is_window_closed():
+        tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse)
 
         if show_main_menu:
             main_menu(con, main_menu_background_image, constants['screen_width'], constants['screen_height'])
@@ -58,7 +59,7 @@ def main():
             if show_load_error_message:
                 message_box(con, 'No save game to load', 50, constants['screen_width'], constants['screen_height'])
 
-            libtcod.console_flush()
+            tcod.console_flush()
 
             action = handle_main_menu(key)
 
@@ -84,7 +85,7 @@ def main():
             elif exit_game:
                 break
         else:
-            libtcod.console_clear(con)
+            con.clear()
             play_game(player, entities, game_map, message_log, game_state, con, panel, constants)
             show_main_menu = True
 
@@ -95,16 +96,16 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
     fov_map = initialise_fov(game_map)
 
     # Define inputs
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
+    key = tcod.Key()
+    mouse = tcod.Mouse()
 
     previous_game_state = game_state
 
     targeting_item = None
 
     # Main gam loop to run until the window is closed
-    while not libtcod.console_is_window_closed():
-        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
+    while not tcod.console_is_window_closed():
+        tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
             recompute_fov(fov_map, player.x, player.y, constants['fov_radius'], constants['fov_light_walls'],
@@ -116,7 +117,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                    mouse, constants['colours'], game_state)
         fov_recompute = False
 
-        libtcod.console_flush()
+        tcod.console_flush()
 
         clear_all(con, entities)
 
@@ -171,7 +172,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
 
                     break
                 else:
-                    message_log.add_message(Message('The {0} is not here to pick up here.'.format(entity.name), libtcod.yellow))
+                    message_log.add_message(Message('The {0} is not here to pick up here.'.format(entity.name), tcod.yellow))
 
         if show_inventory:
             previous_game_state = game_state
@@ -196,12 +197,12 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                     entities = game_map.next_floor(player, message_log, constants)
                     fov_map = initialise_fov(game_map)
                     fov_recompute = True
-                    libtcod.console_clear(con)
+                    tcod.console_clear(con)
 
                     break
 
                 else:
-                    message_log.add_message(Message('There are no stairs here', libtcod.yellow))
+                    message_log.add_message(Message('There are no stairs here', tcod.yellow))
 
         if level_up:
             if level_up == 'hp':
@@ -238,7 +239,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 return True
 
         if fullscreen:
-            libtcod.console_set_fullscreen(not libtcod.console_is_fullscreen())
+            tcod.console_set_fullscreen(not tcod.console_is_fullscreen())
 
         # Print all accumulated messages via message keys
         for player_turn_result in player_turn_results:
@@ -289,7 +290,7 @@ def play_game(player, entities, game_map, message_log, game_state, con, panel, c
                 if leveled_up:
                     message_log.add_message(Message(
                         'Your battle skills grow stronger! You reached level {0}!'.format(
-                            player.level.current_level), libtcod.yellow))
+                            player.level.current_level), tcod.yellow))
                     previous_game_state = game_state
                     game_state = GameStates.LEVEL_UP
 

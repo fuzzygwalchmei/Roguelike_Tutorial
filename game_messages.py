@@ -1,8 +1,8 @@
-import tcod as libtcod
+import tcod
 import textwrap
 
 class Message:
-    def __init__(self, text, colour=libtcod.white):
+    def __init__(self, text, colour=tcod.white):
         self.text = text
         self.colour = colour
 

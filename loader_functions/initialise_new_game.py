@@ -1,4 +1,4 @@
-import tcod as libtcod
+import tcod
 
 from components.equipable import Equipable
 from components.equipment import Equipment
@@ -42,10 +42,10 @@ def get_constants():
     max_items_per_room = 2
 
     colours = {
-        'dark_wall': libtcod.Color(0, 0, 100),
-        'dark_ground': libtcod.Color(50, 50, 1500),
-        'light_wall': libtcod.Color(130, 110, 50),
-        'light_ground': libtcod.Color(200, 180, 50)
+        'dark_wall': tcod.Color(0, 0, 100),
+        'dark_ground': tcod.Color(50, 50, 1500),
+        'light_wall': tcod.Color(130, 110, 50),
+        'light_ground': tcod.Color(200, 180, 50)
     }
 
     constants = {
@@ -79,13 +79,13 @@ def get_game_variables(constants):
     inventory_component = Inventory(26)
     level_component = Level()
     equipment_component = Equipment()
-    player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
+    player = Entity(0, 0, '@', tcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
                     fighter=fighter_component, inventory=inventory_component, level=level_component,
                     equipment=equipment_component)
     entities = [player]
 
     equippable_component = Equipable(EquipmentSlots.MAIN_HAND, power_bonus=2)
-    dagger = Entity(0, 0, '-', libtcod.sky, 'Dagger', equipable=equippable_component)
+    dagger = Entity(0, 0, '-', tcod.sky, 'Dagger', equipable=equippable_component)
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
 

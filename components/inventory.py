@@ -1,4 +1,4 @@
-import tcod as libtcod
+import tcod
 from game_messages import Message
 
 
@@ -13,10 +13,10 @@ class Inventory:
         if len(self.items) >= self.capacity:
             results.append({'item_added': None,
                             'message': Message('You cannot carry any more items. Your inventory is full',
-                                               libtcod.yellow)})
+                                               tcod.yellow)})
         else:
             results.append({'item_added': item,
-                            'message': Message('You picked up a {0}!'.format(item.name), libtcod.blue)})
+                            'message': Message('You picked up a {0}!'.format(item.name), tcod.blue)})
 
             self.items.append(item)
         return results
@@ -32,7 +32,7 @@ class Inventory:
             if equipable_component:
                 results.append({'equip': item_entity})
             else:
-                results.append({'message': Message('The {0} can not be used'.format(item_entity.name), libtcod.yellow)})
+                results.append({'message': Message('The {0} can not be used'.format(item_entity.name), tcod.yellow)})
         else:
             if item_component.targeting and not (kwargs.get('target_x') or kwargs.get('target_y')):
                 results.append({'targeting': item_entity})
@@ -61,6 +61,6 @@ class Inventory:
         item.y = self.owner.y
 
         self.remove_item(item)
-        results.append({'item_dropped': item, 'message': Message('You dropped the {0}'.format(item.name), libtcod.yellow)})
+        results.append({'item_dropped': item, 'message': Message('You dropped the {0}'.format(item.name), tcod.yellow)})
 
         return results
