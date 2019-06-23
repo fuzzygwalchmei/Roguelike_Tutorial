@@ -29,7 +29,7 @@ def main():
     tcod.console_set_custom_font('arial10x10.png', tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
     # Initialise console
     tcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False,
-                              renderer=tcod.RENDERER_SDL2, vsync=True)
+                           renderer=tcod.RENDERER_SDL2, vsync=True)
 
     # Variables for console and display panel
     con = tcod.console.Console(constants['screen_width'], constants['screen_height'])
